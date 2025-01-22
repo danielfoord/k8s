@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:latest
@@ -35,6 +33,13 @@ services:
   deno-api:
     build: .
     container_name: deno_api
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./app
+          target: /app
+        - action: rebuild
+          path: deno.json
     ports:
       - "8888:8888"
     networks:
@@ -48,7 +53,7 @@ services:
       POSTGRES_DB: postgres_db
       POSTGRES_HOST: postgres_db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/health" ]
       interval: 30s
       timeout: 10s
       retries: 3

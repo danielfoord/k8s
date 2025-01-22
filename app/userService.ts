@@ -1,7 +1,6 @@
 import { DatabaseClient } from "./db.ts";
 import { User } from "./types.ts";
 
-// userService.ts
 export class UserService {
   constructor(private dbClient: DatabaseClient) { }
 

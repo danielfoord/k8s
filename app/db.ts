@@ -1,13 +1,11 @@
 import { Client } from "https://deno.land/x/postgres@v0.17.0/client.ts";
+import type { QueryObjectResult } from "https://deno.land/x/postgres@v0.17.0/query/query.ts";
 import { Config } from "./types.ts";
 
-// db.ts
 export interface DatabaseClient {
   connect(): Promise<void>;
-  // deno-lint-ignore no-explicit-any
-  queryObject(query: string, params?: any[]): Promise<{ rows: any[] }>;
+  queryObject<T>(query: string, params?: unknown[]): Promise<QueryObjectResult<T>>;
 }
-
 
 export class PostgresClient implements DatabaseClient {
   private client: Client;
@@ -26,8 +24,7 @@ export class PostgresClient implements DatabaseClient {
     await this.client.connect();
   }
 
-  // deno-lint-ignore no-explicit-any
-  async queryObject(query: string, params?: any[]): Promise<{ rows: any[] }> {
-    return await this.client.queryObject(query, params);
+  queryObject<T>(query: string, params?: unknown[]): Promise<QueryObjectResult<T>> {
+    return this.client.queryObject<T>(query, params);
   }
 }

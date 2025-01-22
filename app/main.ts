@@ -1,4 +1,3 @@
-// main.ts
 import { loadConfig } from "./config.ts";
 import { UserService } from "./userService.ts";
 import { createApp } from "./app.ts";

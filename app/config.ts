@@ -1,6 +1,5 @@
 import { Config } from "./types.ts";
 
-// config.ts
 export function loadConfig(): Config {
   const postgresUser = Deno.env.get("POSTGRES_USER");
   const postgresPassword = Deno.env.get("POSTGRES_PASSWORD");
