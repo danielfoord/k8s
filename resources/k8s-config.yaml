@@ -1,0 +1,20 @@
+# config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  POSTGRES_DB: postgres_db
+  POSTGRES_HOST: postgres
+  PGADMIN_DEFAULT_EMAIL: admin@admin.com
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+type: Opaque
+data:
+  # Note: these are base64 encoded values
+  POSTGRES_USER: YWRtaW4=           # admin
+  POSTGRES_PASSWORD: YWRtaW5wYXNzd29yZA==  # adminpassword
+  PGADMIN_DEFAULT_PASSWORD: YWRtaW4=  # admin
