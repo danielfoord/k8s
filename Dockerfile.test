@@ -1,0 +1,15 @@
+# Dockerfile.test
+FROM denoland/deno:2.1.7
+
+# Install netcat-openbsd and curl
+USER root
+RUN apt-get update && apt-get install -y netcat-openbsd curl && rm -rf /var/lib/apt/lists/*
+USER deno
+
+WORKDIR /app
+COPY --chown=deno:deno deno.json deno.lock ./
+RUN deno cache app/main.ts
+COPY --chown=deno:deno . .
+
+# Default test command
+CMD ["deno", "test", "--allow-all"]

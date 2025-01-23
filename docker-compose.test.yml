@@ -1,0 +1,41 @@
+# docker-compose.test.yml
+services:
+  deno-test:
+    build: 
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: deno_test
+    networks:
+      - postgres_network
+    depends_on:
+      deno-api:
+        condition: service_started
+      postgres:
+        condition: service_started
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: postgres_db
+      POSTGRES_HOST: postgres_db
+      API_URL: http://deno-api:8888
+    working_dir: /app
+    entrypoint: [""]
+    command: >
+      sh -c "
+        echo 'Waiting for Postgres...' &&
+        until nc -z postgres_db 5432; do
+          echo 'Waiting for Postgres to accept connections...';
+          sleep 1;
+        done &&
+        echo 'Postgres is ready.' &&
+        echo 'Waiting for API...' &&
+        until curl -s http://deno-api:8888/health; do
+          echo 'Waiting for API...';
+          sleep 1;
+        done &&
+        echo 'API is ready. Running tests...' &&
+        find . -name '*_test.ts' -o -name '*.test.ts' &&
+        deno test --allow-all ./**/*_test.ts ./**/*.test.ts
+      "
+    volumes:
+      - .:/app
