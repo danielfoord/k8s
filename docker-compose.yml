@@ -14,7 +14,7 @@ services:
       - postgres_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d postgres_db"]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d postgres_db" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -43,10 +43,16 @@ services:
         - action: sync+restart
           path: ./app
           target: /app
+        - action: sync+restart
+          path: ./main.ts
+          target: /main.ts
         - action: rebuild
           path: deno.json
     ports:
       - "8888:8888"
+    volumes:
+      - ./prisma:/app/prisma  # Changed: specifically mounting prisma directory
+      - deno-cache:/deno-dir  # Changed: simplified volume mapping
     networks:
       - postgres_network
     depends_on:
@@ -58,11 +64,13 @@ services:
       POSTGRES_PASSWORD: adminpassword
       POSTGRES_DB: postgres_db
       POSTGRES_HOST: postgres_db
+      DATABASE_URL: postgresql://admin:adminpassword@postgres_db:5432/k8s-test?schema=public
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8888/health" ]
       interval: 10s
       timeout: 5s
       retries: 3
+    
 
 networks:
   postgres_network:
@@ -71,3 +79,4 @@ networks:
 volumes:
   postgres_data:
   pgadmin_data:
+  deno-cache:

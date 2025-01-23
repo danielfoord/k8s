@@ -1,7 +1,7 @@
-import { loadConfig } from "./config.ts";
-import { UserService } from "./userService.ts";
-import { createApp } from "./app.ts";
-import { PostgresClient } from "./db.ts";
+import { loadConfig } from "./app/config.ts";
+import { UserService } from "./app/userService.ts";
+import { createApp } from "./app/app.ts";
+import { PostgresClient } from "./app/db.ts";
 
 if (import.meta.main) {
   const config = loadConfig();

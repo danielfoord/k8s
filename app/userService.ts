@@ -10,14 +10,14 @@ export class UserService {
   }
 
   private async createUsersTable(): Promise<void> {
-    const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS users (
-        Id SERIAL PRIMARY KEY,
-        EmailAddress VARCHAR(100) NOT NULL,
-        HashedPassword VARCHAR(100) NOT NULL
-      );
-    `;
-    await this.dbClient.queryObject(createTableQuery);
+    // const createTableQuery = `
+    //   CREATE TABLE IF NOT EXISTS users (
+    //     Id SERIAL PRIMARY KEY,
+    //     EmailAddress VARCHAR(100) NOT NULL,
+    //     HashedPassword VARCHAR(100) NOT NULL
+    //   );
+    // `;
+    // await this.dbClient.queryObject(createTableQuery);
   }
 
   async getAllUsers(): Promise<User[]> {
