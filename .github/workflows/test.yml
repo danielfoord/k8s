@@ -73,7 +73,7 @@ jobs:
           retention-days: 7
 
       # Generate test report
-      - name: Generate test report
+      - name: Generate test report 
         if: always()
         run: |
           mkdir -p test-results
