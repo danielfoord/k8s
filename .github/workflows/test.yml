@@ -1,5 +1,10 @@
 name: Run Tests
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 on:
   push:
     branches:
@@ -72,46 +77,14 @@ jobs:
       - name: Generate test report
         if: always()
         run: |
+          mkdir -p test-results
           echo "## Test Results" > test-results/report.md
           echo "\`\`\`" >> test-results/report.md
-          cat test-results/test-output.log >> test-results/report.md
+          grep "^deno_test" test-results/test-output.log >> test-results/report.md || echo "No test output found"
           echo "\`\`\`" >> test-results/report.md
-
-      # Post test results as PR comment
-      - name: Post test results
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const report = fs.readFileSync('test-results/report.md', 'utf8');
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: report
-            });
 
       # Cleanup
       - name: Cleanup
         if: always()
         run: |
           docker compose -f docker-compose.yml -f docker-compose.test.yml down --volumes --remove-orphans
-
-      # Report job status
-      - name: Report status
-        if: always()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { job, conclusion } = context;
-            const status = conclusion === 'success' ? '✅' : '❌';
-            const message = `${status} Test job completed with status: ${conclusion}`;
-
-            if (context.eventName === 'pull_request') {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: message
-              });
-            }
