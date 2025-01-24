@@ -1,6 +1,7 @@
 import { Application, Router, Context, RouterContext } from "https://deno.land/x/oak@v13.0.0/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import { PrismaClient } from "./generated/client/index.js";
+import { CreateDinosaurRequest } from "./types.ts";
 
 const prisma = new PrismaClient();;
 
@@ -27,11 +28,6 @@ async function handleGetDinosaurs(
       error: "Internal server error"
     } as ErrorResponse;
   }
-}
-
-interface CreateDinosaurRequest {
-  name: string;
-  description: string;
 }
 
 async function handleCreateDinosaur(

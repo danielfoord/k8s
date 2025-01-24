@@ -1,9 +1,3 @@
-export interface User {
-  id?: number;
-  emailAddress: string;
-  hashedPassword: string;
-}
-
 export interface Config {
   postgresUser: string;
   postgresPassword: string;
@@ -12,13 +6,8 @@ export interface Config {
   port: number;
 }
 
-export interface ErrorResponse {
-  error: string;
-  details?: string;
-}
 
-export interface CreateUserRequest {
-  emailAddress: string;
-  hashedPassword: string;
+export interface CreateDinosaurRequest {
+  name: string;
+  description: string;
 }
-
