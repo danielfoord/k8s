@@ -79,6 +79,7 @@ jobs:
 
       # Post test results as PR comment
       - name: Post test results
+        if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v6
         with:
           script: |
