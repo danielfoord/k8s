@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  // previewFeatures = ["deno"]
+  previewFeatures = ["deno"]
   output          = "../app/generated/client"
 }
 
