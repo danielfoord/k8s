@@ -83,21 +83,6 @@ jobs:
           grep "^deno_test" test-results/test-output.log >> test-results/report.md || echo "No test output found"
           echo "\`\`\`" >> test-results/report.md
 
-      # Post test results as PR comment
-      - name: Post test results
-        if: github.event_name == 'pull_request' && always()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const report = fs.readFileSync('test-results/report.md', 'utf8');
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: report
-            });
-
       # Cleanup
       - name: Cleanup
         if: always()
@@ -110,15 +95,28 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { job, conclusion } = context;
-            const status = conclusion === 'success' ? '✅' : '❌';
-            const message = `${status} Test job completed with status: ${conclusion}`;
+            const fs = require('fs');
+            const testOutput = fs.readFileSync('test-results/test-output.log', 'utf8');
+            
+            // Check test results
+            const hasSuccessfulExit = testOutput.includes('deno_test exited with code 0');
+            const hasNoFailures = testOutput.includes('| 0 failed');
+            const testsPassed = hasSuccessfulExit && hasNoFailures;
+            
+            // Get test summary
+            const summaryMatch = testOutput.match(/(\d+) passed $$(\d+) steps$$ \| (\d+) failed/);
+            const testSummary = summaryMatch 
+              ? `${summaryMatch[1]} tests passed, ${summaryMatch[3]} failed` 
+              : 'Test results unavailable';
+            
+            const status = testsPassed ? '✅' : '❌';
+            const message = `${status} Test Results: ${testSummary}`;
 
             if (context.eventName === 'pull_request') {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: JSON.stringify({ context })
+                body: message
               });
             }
