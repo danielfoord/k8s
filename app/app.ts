@@ -1,22 +1,27 @@
 import { Application, Router, Context, RouterContext } from "https://deno.land/x/oak@v13.0.0/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import { UserService } from "./userService.ts";
-import { ErrorResponse, CreateUserRequest } from "./types.ts";
+import { PrismaClient } from "./generated/client/index.js";
+
+const prisma = new PrismaClient();;
 
 const ROUTES = {
-  USERS: "/api/users",
+  DINOSAURS: "/api/dinosaurs",
   HEALTH: "/health",
 } as const;
 
-async function handleGetUsers(
-  ctx: RouterContext<typeof ROUTES.USERS>,
-  userService: UserService,
+interface ErrorResponse {
+  error: string;
+  details?: string;
+}
+
+async function handleGetDinosaurs(
+  ctx: RouterContext<typeof ROUTES.DINOSAURS>,
 ): Promise<void> {
   try {
-    const users = await userService.getAllUsers();
-    ctx.response.body = users;
+    const dinosaurs = await prisma.dinosaur.findMany();
+    ctx.response.body = dinosaurs;
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error("Error fetching dinosaurs:", error);
     ctx.response.status = 500;
     ctx.response.body = {
       error: "Internal server error"
@@ -24,27 +29,37 @@ async function handleGetUsers(
   }
 }
 
-async function handleCreateUser(
-  ctx: RouterContext<typeof ROUTES.USERS>,
-  userService: UserService,
+interface CreateDinosaurRequest {
+  name: string;
+  description: string;
+}
+
+async function handleCreateDinosaur(
+  ctx: RouterContext<typeof ROUTES.DINOSAURS>,
 ): Promise<void> {
   try {
-    const body = ctx.request.body as Partial<CreateUserRequest>;
+    const body = await ctx.request.body.json() as Partial<CreateDinosaurRequest>;
 
-    if (!isValidCreateUserRequest(body)) {
+    if (!isValidCreateDinosaurRequest(body)) {
       ctx.response.status = 400;
       ctx.response.body = {
         error: "Invalid request body",
-        details: "EmailAddress and HashedPassword are required",
+        details: "Name and Description are required",
       } as ErrorResponse;
       return;
     }
 
-    const newUser = await userService.createUser(body);
+    const newDinosaur = await prisma.dinosaur.create({
+      data: {
+        name: body.name,
+        description: body.description,
+      },
+    });
+
     ctx.response.status = 201;
-    ctx.response.body = newUser;
+    ctx.response.body = newDinosaur;
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Error creating dinosaur:", error);
     ctx.response.status = 500;
     ctx.response.body = {
       error: "Internal server error",
@@ -53,11 +68,11 @@ async function handleCreateUser(
   }
 }
 
-function isValidCreateUserRequest(body: Partial<CreateUserRequest>): body is CreateUserRequest {
+function isValidCreateDinosaurRequest(body: Partial<CreateDinosaurRequest>): body is CreateDinosaurRequest {
   return Boolean(
     body &&
-    typeof body.emailAddress === "string" &&
-    typeof body.hashedPassword === "string"
+    typeof body.name === "string" &&
+    typeof body.description === "string"
   );
 }
 
@@ -85,11 +100,11 @@ function setupErrorHandler(app: Application): void {
   });
 }
 
-function setupRoutes(router: Router, userService: UserService): void {
+function setupRoutes(router: Router): void {
   router
-    .get(ROUTES.USERS, (ctx) => handleGetUsers(ctx, userService))
-    .post(ROUTES.USERS, (ctx) => handleCreateUser(ctx, userService))
-    .options(ROUTES.USERS, (ctx) => {
+    .get(ROUTES.DINOSAURS, handleGetDinosaurs)
+    .post(ROUTES.DINOSAURS, handleCreateDinosaur)
+    .options(ROUTES.DINOSAURS, (ctx) => {
       ctx.response.status = 204;
     })
     .get(ROUTES.HEALTH, (ctx) => {
@@ -97,12 +112,12 @@ function setupRoutes(router: Router, userService: UserService): void {
     });
 }
 
-export function createApp(userService: UserService): Application {
+export function createApp(): Application {
   const app = new Application();
   const router = new Router();
 
   setupMiddleware(app);
-  setupRoutes(router, userService);
+  setupRoutes(router);
 
   app.use(router.routes());
   app.use(router.allowedMethods());

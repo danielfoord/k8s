@@ -6,13 +6,14 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["deno"]
+  // previewFeatures = ["deno"]
   output          = "../app/generated/client"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
 }
 
 model Dinosaur {
