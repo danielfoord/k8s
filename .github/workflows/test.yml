@@ -76,9 +76,14 @@ jobs:
       - name: Generate test report
         if: always()
         run: |
+          mkdir -p test-results
           echo "## Test Results" > test-results/report.md
           echo "\`\`\`" >> test-results/report.md
-          cat test-results/test-output.log >> test-results/report.md
+          if [ -f test-results/test-output.log ]; then
+            cat test-results/test-output.log >> test-results/report.md
+          else
+            echo "No test output found" >> test-results/report.md
+          fi
           echo "\`\`\`" >> test-results/report.md
 
       # Post test results as PR comment
