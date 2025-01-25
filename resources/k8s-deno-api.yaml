@@ -1,4 +1,27 @@
-# deno-api-deployment.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prisma-migrate
+spec:
+  template:
+    spec:
+      containers:
+        - name: prisma-migrate
+          image: k8-test-deno-api:latest
+          imagePullPolicy: Never
+          workingDir: /app
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+                echo "Starting migration..."
+                npx prisma migrate deploy --schema=./prisma/schema.prisma
+                echo "Migration completed successfully"
+          envFrom:
+            - configMapRef:
+                name: app-config
+      restartPolicy: Never
+  backoffLimit: 4
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,10 +36,27 @@ spec:
       labels:
         app: deno-api
     spec:
+      initContainers:
+        - name: prisma-migrate
+          image: k8-test-deno-api:latest
+          imagePullPolicy: Never
+          workingDir: /app
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+                echo "Starting migration..."
+                npx prisma migrate deploy --schema=./prisma/schema.prisma
+                echo "Migration completed successfully"
+          envFrom:
+            - configMapRef:
+                name: app-config
       containers:
         - name: deno-api
           image: k8-test-deno-api:latest
           imagePullPolicy: Never
+          workingDir: /app
+          command: ["deno"]
+          args: ["task", "dev"]
           ports:
             - containerPort: 8888
           envFrom:
