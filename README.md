@@ -5,7 +5,7 @@ docker compose -f docker-compose.yml -f docker-compose.test.yml up --build --exi
 
 Migrate schema
 ```
-npx prisma migrate dev --name init
+npx prisma migrate dev --name {migration_name}
 ```
 
 ```
