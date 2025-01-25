@@ -27,9 +27,9 @@ WORKDIR /app
 # Copy dependency files first
 COPY --chown=deno:deno deno.json deno.lock ./
 
-# # Copy wait-for-it script and entrypoint
-# COPY --chown=deno:deno docker-entrypoint.sh wait-for-it.sh ./
-# RUN chmod +x docker-entrypoint.sh wait-for-it.sh
+# Copy wait-for-it script and entrypoint
+COPY --chown=deno:deno docker-entrypoint.sh wait-for-it.sh ./
+RUN chmod +x docker-entrypoint.sh wait-for-it.sh
 
 # Set npm cache directory to a location where deno user has access
 ENV NPM_CONFIG_CACHE=/home/deno/.npm
@@ -50,7 +50,7 @@ COPY --chown=deno:deno . .
 RUN npm install prisma && npx prisma generate
 
 # The entrypoint script will handle migrations
-# ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # The main application command
 CMD ["deno", "task", "dev"]
