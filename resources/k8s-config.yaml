@@ -7,6 +7,8 @@ data:
   POSTGRES_DB: postgres_db
   POSTGRES_HOST: postgres
   PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  # TODO: This needs to be a secret
+  DATABASE_URL: postgresql://admin:adminpassword@postgres:5432/k8s-test?schema=public
 ---
 apiVersion: v1
 kind: Secret

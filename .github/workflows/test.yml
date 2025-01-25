@@ -4,6 +4,7 @@ permissions:
   contents: read
   issues: write
   pull-requests: write
+  packages: write
 
 on:
   push:
@@ -88,3 +89,28 @@ jobs:
         if: always()
         run: |
           docker compose -f docker-compose.yml -f docker-compose.test.yml down --volumes --remove-orphans
+
+      # Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push Docker image
+      - name: Build and push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          labels: |
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
