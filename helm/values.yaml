@@ -1,0 +1,14 @@
+postgres:
+  user: admin
+  password: adminpassword
+  database: postgres_db
+  storage: 3Gi
+pgadmin:
+  email: admin@admin.com
+  password: admin
+  storage: 1Gi
+denoApi:
+  replicas: 1
+  image: k8-test-deno-api:latest
+metricsServer:
+  image: registry.k8s.io/metrics-server/metrics-server:v0.7.2

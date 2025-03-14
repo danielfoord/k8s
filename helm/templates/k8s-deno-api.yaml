@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deno-api
+spec:
+  replicas: {{ .Values.denoApi.replicas }}
+  selector:
+    matchLabels:
+      app: deno-api
+  template:
+    metadata:
+      labels:
+        app: deno-api
+    spec:
+      initContainers:
+      - name: prisma-migrate
+        image: "{{ .Values.denoApi.image }}"
+        imagePullPolicy: Never
+        workingDir: /app
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting migration..."
+            npx prisma migrate deploy --schema=./prisma/schema.prisma
+            echo "Migration completed successfully"
+        envFrom:
+          - configMapRef:
+              name: app-config
+      containers:
+      - name: deno-api
+        image: "{{ .Values.denoApi.image }}"
+        workingDir: /app
+        command: ["deno"]
+        args: ["task", "dev"]
+        ports:
+        - containerPort: 8888
+        envFrom:
+          - configMapRef:
+              name: app-config
+          - secretRef:
+              name: app-secrets
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8888
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
