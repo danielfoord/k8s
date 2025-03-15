@@ -5,6 +5,14 @@ metadata:
 spec:
   template:
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:13
+          command: [
+            "sh",
+            "-c",
+            'until pg_isready -h postgres -p 5432; do echo "Waiting for postgres..."; sleep 5; done; echo "Postgres is up"',
+          ]
       containers:
         - name: prisma-migrate
           image: k8-test-deno-api:latest

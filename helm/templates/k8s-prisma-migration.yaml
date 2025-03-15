@@ -6,16 +6,24 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:13
+          command: [
+            "sh",
+            "-c",
+            'until pg_isready -h postgres -p 5432; do echo "Waiting for postgres..."; sleep 5; done; echo "Postgres is up"',
+          ]
       containers:
-      - name: prisma-migrate
-        image: "{{ .Values.denoApi.image }}"
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            echo "Starting migration..."
-            npx prisma migrate deploy --schema=./prisma/schema.prisma
-            echo "Migration completed successfully"
-        envFrom:
-          - configMapRef:
-              name: app-config
+        - name: prisma-migrate
+          image: "{{ .Values.denoApi.image }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+                echo "Starting migration..."
+                npx prisma migrate deploy --schema=./prisma/schema.prisma
+                echo "Migration completed successfully"
+          envFrom:
+            - configMapRef:
+                name: app-config
   backoffLimit: 4
