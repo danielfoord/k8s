@@ -50,7 +50,7 @@ COPY --chown=deno:deno . .
 RUN npm install prisma && npx prisma generate
 
 # The entrypoint script will handle migrations
-# ENTRYPOINT ["/app/docker-entrypoint.sh"]
+# ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # The main application command
 CMD ["deno", "task", "dev"]

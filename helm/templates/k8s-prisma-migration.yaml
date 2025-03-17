@@ -17,6 +17,7 @@ spec:
       containers:
         - name: prisma-migrate
           image: "{{ .Values.denoApi.image }}"
+          imagePullPolicy: Never
           command: ["/bin/sh", "-c"]
           args:
             - |
